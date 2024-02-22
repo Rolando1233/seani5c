@@ -11,6 +11,15 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+
+import cloudinary
+import cloudinary.uploader
+import cloudinary.api
+
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,6 +43,7 @@ INSTALLED_APPS = [
     # Local Apps
     'library.apps.LibraryConfig',
     'career.apps.CareerConfig',
+    'exam.apps.ExamConfig',
     # Django Apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -134,3 +144,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+cloudinary.config( 
+  cloud_name = str(os.environ.get('CLOUD_NAME')), 
+  api_key = str(os.environ.get('API_KEY')), 
+  api_secret = str(os.environ.get('API_SECRET')),
+  secure = True
+)
+
