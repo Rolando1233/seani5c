@@ -4,3 +4,4 @@ from .models import Career
 
 # Register your models here.
 admin.site.register(Career)
+verbose_name = 'Carrera'
