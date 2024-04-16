@@ -15,29 +15,39 @@ def home(request):
     return render(request, 'exam/home.html', {'user': user})
 
 @login_required
-def question(request, m_id, q_id = 1):
+def question(request, m_id, q_id=1):
     exam = request.user.exam
+
+    # Obtener todas las preguntas del examen actual para el módulo dado
+    questions = exam.breakdown_set.filter(question__module_id=m_id)
+    
+    try:
+        # Verificar si la pregunta solicitada existe en la base de datos
+        question = questions.get(pk=q_id)
+    except questions.model.DoesNotExist:
+        # Si la pregunta no existe, redireccionar al usuario a la página de inicio
+        return redirect('exam:home')
+
     if request.method == 'POST':
-        answer = request.POST['answer']
-        questions = exam.breakdown_set.filter(question__module_id=m_id)
-        question = questions[q_id -1]
+        answer = request.POST.get('answer')
+        # Procesar la respuesta y guardarla en la base de datos
         question.answer = answer
         question.save()
-        return redirect('exam:question', m_id, q_id +1)
-    
+        
+        # Redireccionar al usuario a la siguiente pregunta si existe
+        next_question = questions.filter(pk__gt=q_id).first()
+        if next_question:
+            return redirect('exam:question', m_id=m_id, q_id=next_question.pk)
+        else:
+            return redirect('exam:home')
 
-    try:
-        questions = exam.breakdown_set.filter(question__module_id=m_id)
-        question = questions[q_id - 1].question
-        answer = questions[q_id - 1].answer
-        return render(request, 'exam/question.html', {
-            'question': question,
-            'correct': answer,
-            'm_id': m_id,
-            'q_id':q_id})
-    
-    except IndexError:
-        return redirect('exam:home')
+    # Renderizar la pregunta y sus detalles
+    return render(request, 'exam/question.html', {
+        'question': question.question,
+        'answer': question.answer,
+        'm_id': m_id,
+        'q_id': q_id
+    })
 
 @login_required
 def add_candidate(request):

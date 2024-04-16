@@ -95,10 +95,15 @@ class Exam(models.Model):
 
     def compute_score(self):
         score = 0.0
-        for exammodule in self.exammodule_set.all():
-            score += exammodule.score
-        self.score = score / self.modules.count()
+        exammodules = self.exammodule_set.all()
+        if exammodules:
+            for exammodule in exammodules:
+                score += exammodule.score
+            self.score = score / len(exammodules)
+        else:
+            self.score = 0.0
         self.save()
+
 
     def compute_score_by_module(self, m_id):
         score = 0.0
